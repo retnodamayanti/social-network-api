@@ -19,7 +19,7 @@ const reactionSchema = new mongoose.Schema(
     createdAt: {
       type: Date,
       default: Date.now,
-      get: (timestamp) => formatDate(timestamp), y
+      get: (timestamp) => formatDate(timestamp),
     },
   },
   {

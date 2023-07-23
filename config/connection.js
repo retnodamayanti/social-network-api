@@ -1,5 +1,23 @@
-const { connect, connection } = require('mongoose');
+const mongoose = require('mongoose');
 
-connect('mongodb://127.0.0.1:27017/socialnetworkAPI');
+const connectionString =
+  process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/socialAPI';
 
-module.exports = connection;
+mongoose.connect(connectionString, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+
+const dbConnection = mongoose.connection;
+
+// Event listeners for the MongoDB connection
+dbConnection.once('open', () => {
+  console.log('Connected to the database');
+});
+
+dbConnection.on('error', (error) => {
+  console.error('Error connecting to the database:', error.message);
+});
+
+// Export the mongoose object (optional, but can be useful for some configurations)
+module.exports = dbConnection;

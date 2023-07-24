@@ -122,7 +122,7 @@ exports.deleteUser = async (req, res) => {
       // Delete the user from the collection
       await User.deleteOne({ _id: userId });
   
-      res.json({ message: 'User has been deleted.' });
+      res.json({ message: 'User and associated thoughts have been deleted.' });
     } catch (err) {
       console.error(err);
       res.status(500).json({ error: 'Failed to delete the user.' });

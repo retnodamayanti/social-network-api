@@ -1,3 +1,4 @@
+const User = require('../models/User');
 const Thought = require('../models/Thought');
 
 // Controller functions for thought routes
@@ -11,26 +12,51 @@ exports.getAllThoughts = async (req, res) => {
 };
 
 exports.getThoughtById = async (req, res) => {
-  try {
-    const thought = await Thought.findById(req.params.id).populate('reactions');
-    if (!thought) {
-      return res.status(404).json({ message: 'Thought not found.' });
+    try {
+      const thought = await Thought.findById(req.params.id).populate({
+        path: 'reactions',
+        populate: {
+          path: 'username',
+          select: 'username',
+        },
+      });
+  
+      if (!thought) {
+        return res.status(404).json({ message: 'Thought not found.' });
+      }
+  
+      res.json(thought);
+    } catch (err) {
+      res.status(500).json({ error: 'Failed to get the thought.' });
     }
-    res.json(thought);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to get the thought.' });
-  }
-};
+  };
+  
 
 exports.createThought = async (req, res) => {
-  try {
-    const { thoughtText, username } = req.body;
-    const newThought = await Thought.create({ thoughtText, username });
-    res.status(201).json(newThought);
-  } catch (err) {
-    res.status(400).json({ error: 'Failed to create a new thought.' });
-  }
-};
+    try {
+      const { thoughtText, username, userId } = req.body;
+  
+      // Check if the user with the given userId exists
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found.' });
+      }
+  
+      // Create the new thought
+      const newThought = await Thought.create({
+        thoughtText,
+        username,
+      });
+  
+      // Add the new thought's ID to the 'thoughts' array of the user
+      user.thoughts.push(newThought._id);
+      await user.save();
+  
+      res.status(201).json(newThought);
+    } catch (err) {
+      res.status(400).json({ error: 'Failed to create a new thought.' });
+    }
+  };
 
 exports.updateThought = async (req, res) => {
   try {

@@ -3,13 +3,14 @@ const Thought = require('../models/Thought');
 const mongoose = require('mongoose');
 
 exports.getAllThoughts = async (req, res) => {
-  try {
-    const thoughts = await Thought.find().populate('reactions');
-    res.json(thoughts);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to get thoughts.' });
-  }
-};
+    try {
+      const thoughts = await Thought.find().populate('reactions').lean();
+      res.json(thoughts);
+    } catch (err) {
+      res.status(500).json({ error: 'Failed to get thoughts.' });
+    }
+  };
+  
 
 exports.getThoughtById = async (req, res) => {
     try {
@@ -96,18 +97,19 @@ exports.deleteThought = async (req, res) => {
 exports.addReaction = async (req, res) => {
     try {
       const { reactionBody, username } = req.body;
-      const thoughtId = req.params.thoughtId; // Use req.params.thoughtId to get the thoughtId
+      const thoughtId = req.params.thoughtId;
   
-      // Validate the thoughtId
       if (!mongoose.Types.ObjectId.isValid(thoughtId)) {
         return res.status(400).json({ error: 'Invalid thoughtId.' });
       }
   
+      const reactionId = new mongoose.Types.ObjectId(); // Generate a new ObjectId for the reaction
+  
       const updatedThought = await Thought.findByIdAndUpdate(
         thoughtId,
-        { $push: { reactions: { reactionBody, username } } },
+        { $push: { reactions: { reactionBody, username, _id: reactionId } } }, // Set the _id field to reactionId
         { new: true }
-      );
+      ).lean();
   
       if (!updatedThought) {
         return res.status(404).json({ message: 'Thought not found.' });
@@ -120,16 +122,18 @@ exports.addReaction = async (req, res) => {
     }
   };
   
-  
-  
   exports.removeReaction = async (req, res) => {
     try {
-      const thoughtId = req.params.thoughtId; // Use req.params.thoughtId to get the thoughtId
-      const reactionId = req.params.reactionId; // Use req.params.reactionId to get the reactionId
+      const thoughtId = req.params.thoughtId;
+      const reactionId = req.params.reactionId;
+  
+      if (!mongoose.Types.ObjectId.isValid(thoughtId) || typeof reactionId !== 'string') {
+        return res.status(400).json({ message: 'Invalid thoughtId or reactionId.' });
+      }
   
       const updatedThought = await Thought.findByIdAndUpdate(
         thoughtId,
-        { $pull: { reactions: { _id: reactionId } } }, // Use _id to identify the reaction to be removed
+        { $pull: { reactions: { reactionId: reactionId } } }, 
         { new: true }
       );
   
@@ -137,9 +141,23 @@ exports.addReaction = async (req, res) => {
         return res.status(404).json({ message: 'Thought not found.' });
       }
   
+      console.log('Updated Thought:', updatedThought);
       res.json({ message: 'Reaction has been deleted.' });
     } catch (err) {
+      console.error(err);
       res.status(500).json({ error: 'Failed to remove reaction from the thought.' });
     }
   };
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   

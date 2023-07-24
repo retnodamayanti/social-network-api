@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Thought = require('../models/Thought');
 
 // Controller functions for user routes
 exports.getAllUsers = async (req, res) => {
@@ -100,14 +101,30 @@ exports.updateUser = async (req, res) => {
 
 exports.deleteUser = async (req, res) => {
     try {
-      const deletedUser = await User.findByIdAndDelete(req.params.id);
-      if (!deletedUser) {
+      const userId = req.params.id;
+  
+      // Find the user by ID
+      const user = await User.findById(userId);
+  
+      if (!user) {
         return res.status(404).json({ message: 'User not found.' });
       }
   
+      // Delete all thoughts associated with the user
+      await Thought.deleteMany({ username: user.username });
+  
+      // Remove the user from the 'friends' list of other users
+      await User.updateMany(
+        { _id: { $in: user.friends } },
+        { $pull: { friends: userId } }
+      );
+  
+      // Delete the user from the collection
+      await User.deleteOne({ _id: userId });
+  
       res.json({ message: 'User has been deleted.' });
     } catch (err) {
-        console.error(err);
+      console.error(err);
       res.status(500).json({ error: 'Failed to delete the user.' });
     }
   };

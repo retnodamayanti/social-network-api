@@ -80,7 +80,7 @@ exports.deleteThought = async (req, res) => {
     if (!deletedThought) {
       return res.status(404).json({ message: 'Thought not found.' });
     }
-    res.json(deletedThought);
+    res.json({ message: 'Thought has been deleted.' });
   } catch (err) {
     res.status(500).json({ error: 'Failed to delete the thought.' });
   }

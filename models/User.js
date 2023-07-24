@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Thought = require('./Thought');
 
 const userSchema = new mongoose.Schema({
   username: {
@@ -25,6 +26,21 @@ const userSchema = new mongoose.Schema({
       ref: 'User', 
     },
   ],
+});
+
+userSchema.pre('findOneAndDelete', async function (next) {
+  const userId = this._conditions._id;
+
+  try {
+    // Find all the thoughts associated with the user and delete them
+    await Thought.deleteMany({ username: this.username });
+
+    // Continue to the next middleware (which will handle the user deletion)
+    next();
+  } catch (err) {
+    // If there's an error, pass it to the error handling middleware
+    next(err);
+  }
 });
 
 // Ensure the 'friends' field is set to an empty array if it doesn't exist

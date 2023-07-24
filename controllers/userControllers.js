@@ -99,8 +99,11 @@ exports.deleteUser = async (req, res) => {
         return res.status(404).json({ message: 'User not found.' });
       }
   
-      // Delete all thoughts associated with the user
-      await Thought.deleteMany({ username: user.username });
+      // Get an array of thoughtIds associated with the user
+      const thoughtIds = user.thoughts;
+  
+      // Delete all thoughts associated with the user using the array of thoughtIds
+      await Thought.deleteMany({ _id: { $in: thoughtIds } });
   
       // Remove the user from the 'friends' list of other users
       await User.updateMany(
@@ -108,6 +111,7 @@ exports.deleteUser = async (req, res) => {
         { $pull: { friends: userId } }
       );
   
+      // Delete the user
       await User.deleteOne({ _id: userId });
   
       res.json({ message: 'User and associated thoughts have been deleted.' });
@@ -116,6 +120,8 @@ exports.deleteUser = async (req, res) => {
       res.status(500).json({ error: 'Failed to delete the user.' });
     }
   };
+  
+  
   
 
 exports.addFriend = async (req, res) => {

@@ -1,15 +1,11 @@
 const mongoose = require('mongoose');
 
-//  Reaction schema
-const reactionSchema = new mongoose.Schema(
+const thoughtSchema = new mongoose.Schema(
   {
-    reactionId: {
-      type: mongoose.Schema.Types.ObjectId,
-      default: new mongoose.Types.ObjectId(),
-    },
-    reactionBody: {
+    thoughtText: {
       type: String,
       required: true,
+      minlength: 1,
       maxlength: 280,
     },
     username: {
@@ -19,36 +15,40 @@ const reactionSchema = new mongoose.Schema(
     createdAt: {
       type: Date,
       default: Date.now,
-      get: (timestamp) => formatDate(timestamp),
+      get: (createdAt) => new Date(createdAt).toISOString(), // Format the timestamp on query
     },
+    reactions: [
+      {
+        reactionId: {
+          type: mongoose.Schema.Types.ObjectId,
+          default: () => new mongoose.Types.ObjectId(), // Generate a new ObjectId for each reaction
+        },
+        reactionBody: {
+          type: String,
+          required: true,
+          maxlength: 280,
+        },
+        username: {
+          type: String,
+          required: true,
+        },
+        createdAt: {
+          type: Date,
+          default: Date.now,
+          get: (createdAt) => new Date(createdAt).toISOString(), // Format the timestamp on query
+        },
+      },
+    ],
   },
   {
-    _id: false, 
+    toJSON: { getters: true }, // Include getter methods when converting to JSON
   }
 );
 
-
-function formatDate(timestamp) {
-  
-  return new Date(timestamp).toISOString();
-}
-
-const thoughtSchema = new mongoose.Schema({
-  thoughtText: {
-    type: String,
-    required: true,
-    maxlength: 280,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-    get: (timestamp) => formatDate(timestamp), 
-  },
-  username: {
-    type: String,
-    required: true,
-  },
-  reactions: [reactionSchema], 
+// Ensure the 'reactions' field is set to an empty array if it doesn't exist
+thoughtSchema.pre('save', function (next) {
+  this.reactions = this.reactions || [];
+  next();
 });
 
 thoughtSchema.virtual('reactionCount').get(function () {

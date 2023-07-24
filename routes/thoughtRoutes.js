@@ -5,7 +5,7 @@ const thoughtController = require('../controllers/thoughtControllers');
 // GET all thoughts
 router.get('/', thoughtController.getAllThoughts);
 
-// GET a single thought by its _id and populated reactions data
+// GET a single thought 
 router.get('/:id', thoughtController.getThoughtById);
 
 // POST a new thought

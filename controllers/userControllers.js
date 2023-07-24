@@ -1,7 +1,6 @@
 const User = require('../models/User');
 const Thought = require('../models/Thought');
 
-// Controller functions for user routes
 exports.getAllUsers = async (req, res) => {
     try {
       const users = await User.find()
@@ -14,7 +13,6 @@ exports.getAllUsers = async (req, res) => {
           select: '_id',
         });
   
-      // Iterate through the users and remove unnecessary data from the thoughts and friends arrays
       const usersWithIdsOnly = users.map((user) => ({
         _id: user._id,
         username: user.username,
@@ -35,11 +33,10 @@ exports.getAllUsers = async (req, res) => {
     try {
       const userId = req.params.id;
   
-      // Find the user by its ID and populate both the '_id' and 'reactions' fields of 'thoughts'
       const user = await User.findById(userId)
         .populate({
           path: 'thoughts',
-          select: '_id reactions', // Populate both '_id' and 'reactions' fields
+          select: '_id reactions',
         })
         .populate('friends');
   
@@ -47,10 +44,8 @@ exports.getAllUsers = async (req, res) => {
         return res.status(404).json({ message: 'User not found.' });
       }
   
-      // Ensure the 'friends' field is set to an empty array if it doesn't exist
       user.friends = user.friends || [];
   
-      // Create a new object with the necessary properties
       const userWithFriendCount = {
         _id: user._id,
         username: user.username,
@@ -62,17 +57,11 @@ exports.getAllUsers = async (req, res) => {
   
       res.json(userWithFriendCount);
     } catch (err) {
-      // Log the error for debugging purposes
       console.error(err);
       res.status(500).json({ error: 'Failed to get the user.' });
     }
   };
   
-  
-  
-  
-  
-
 exports.createUser = async (req, res) => {
   try {
     const { username, email } = req.body;
@@ -119,7 +108,6 @@ exports.deleteUser = async (req, res) => {
         { $pull: { friends: userId } }
       );
   
-      // Delete the user from the collection
       await User.deleteOne({ _id: userId });
   
       res.json({ message: 'User and associated thoughts have been deleted.' });
@@ -134,14 +122,12 @@ exports.addFriend = async (req, res) => {
     try {
       const { userId, friendId } = req.params;
   
-      // Add friendId to the friends array of the user with userId
       const user = await User.findByIdAndUpdate(
         userId,
         { $addToSet: { friends: friendId } },
         { new: true }
       );
   
-      // Add userId to the friends array of the user with friendId
       const friend = await User.findByIdAndUpdate(
         friendId,
         { $addToSet: { friends: userId } },
@@ -162,14 +148,12 @@ exports.addFriend = async (req, res) => {
     try {
       const { userId, friendId } = req.params;
   
-      // Remove friendId from the friends array of the user with userId
       const user = await User.findByIdAndUpdate(
         userId,
         { $pull: { friends: friendId } },
         { new: true }
       );
   
-      // Remove userId from the friends array of the user with friendId
       const friend = await User.findByIdAndUpdate(
         friendId,
         { $pull: { friends: userId } },

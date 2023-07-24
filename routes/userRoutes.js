@@ -5,16 +5,16 @@ const userController = require('../controllers/userControllers');
 // GET all users
 router.get('/', userController.getAllUsers);
 
-// GET a single user by its _id and populated thought and friend data
+// GET a user by its id 
 router.get('/:id', userController.getUserById);
 
 // POST a new user
 router.post('/', userController.createUser);
 
-// PUT to update a user by its _id
+// PUT to update a user 
 router.put('/:id', userController.updateUser);
 
-// DELETE to remove user by its _id
+// DELETE to remove user 
 router.delete('/:id', userController.deleteUser);
 
 // POST to add a friend to a user

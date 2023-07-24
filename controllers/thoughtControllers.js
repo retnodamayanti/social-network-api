@@ -1,7 +1,6 @@
 const User = require('../models/User');
 const Thought = require('../models/Thought');
 
-// Controller functions for thought routes
 exports.getAllThoughts = async (req, res) => {
   try {
     const thoughts = await Thought.find().populate('reactions');
@@ -36,19 +35,16 @@ exports.createThought = async (req, res) => {
     try {
       const { thoughtText, username, userId } = req.body;
   
-      // Check if the user with the given userId exists
       const user = await User.findById(userId);
       if (!user) {
         return res.status(404).json({ message: 'User not found.' });
       }
   
-      // Create the new thought
       const newThought = await Thought.create({
         thoughtText,
         username,
       });
   
-      // Add the new thought's ID to the 'thoughts' array of the user
       user.thoughts.push(newThought._id);
       await user.save();
   

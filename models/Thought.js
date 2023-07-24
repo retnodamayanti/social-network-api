@@ -15,13 +15,13 @@ const thoughtSchema = new mongoose.Schema(
     createdAt: {
       type: Date,
       default: Date.now,
-      get: (createdAt) => new Date(createdAt).toISOString(), // Format the timestamp on query
+      get: (createdAt) => new Date(createdAt).toISOString(), 
     },
     reactions: [
       {
         reactionId: {
           type: mongoose.Schema.Types.ObjectId,
-          default: () => new mongoose.Types.ObjectId(), // Generate a new ObjectId for each reaction
+          default: () => new mongoose.Types.ObjectId(), 
         },
         reactionBody: {
           type: String,
@@ -35,17 +35,16 @@ const thoughtSchema = new mongoose.Schema(
         createdAt: {
           type: Date,
           default: Date.now,
-          get: (createdAt) => new Date(createdAt).toISOString(), // Format the timestamp on query
+          get: (createdAt) => new Date(createdAt).toISOString(), 
         },
       },
     ],
   },
   {
-    toJSON: { getters: true }, // Include getter methods when converting to JSON
+    toJSON: { getters: true }, 
   }
 );
 
-// Ensure the 'reactions' field is set to an empty array if it doesn't exist
 thoughtSchema.pre('save', function (next) {
   this.reactions = this.reactions || [];
   next();

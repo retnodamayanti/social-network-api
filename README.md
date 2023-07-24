@@ -2,7 +2,7 @@
 
 ## Description
 
-This is a backend API for a social network application. It provides various endpoints to handle users, thoughts, reactions, and friend connections. Please visit the demo [here](https://maya-tech-blog-8a50da98b642.herokuapp.com/).
+This is a backend API for a social network application. It provides various endpoints to handle users, thoughts, reactions, and friend connections. Please visit the demo [here](https://drive.google.com/file/d/1E5q7wjMzIyIzf5o-eMgnIT3kivfwyXWv/view?usp=sharing).
 
 ## Table of Contents
 
